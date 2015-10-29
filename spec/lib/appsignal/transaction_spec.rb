@@ -282,6 +282,11 @@ describe Appsignal::Transaction do
           ).once
           Appsignal::Extension.should_receive(:set_transaction_error_data).with(
             kind_of(Integer),
+            'metadata',
+            '{"key":"value"}'
+          ).once
+          Appsignal::Extension.should_receive(:set_transaction_error_data).with(
+            kind_of(Integer),
             'params',
             '{"controller":"blog_posts","action":"show","id":"1"}'
           ).once
@@ -310,7 +315,7 @@ describe Appsignal::Transaction do
             kind_of(Integer),
             kind_of(String),
             kind_of(String)
-          ).exactly(4).times
+          ).exactly(5).times
 
           transaction.set_error(error)
         end
@@ -482,6 +487,22 @@ describe Appsignal::Transaction do
         end
 
         its(:keys) { should =~ whitelisted_keys[0, whitelisted_keys.length] }
+      end
+    end
+
+    describe "#metadata" do
+      subject { transaction.send(:metadata) }
+
+      context "when env is nil" do
+        before { transaction.request.stub(:env => nil) }
+
+        it { should be_nil }
+      end
+
+      context "when env is present" do
+        let(:env) { {:metadata => {:key => 'value'}} }
+
+        it { should == env[:metadata] }
       end
     end
 

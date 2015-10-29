@@ -113,6 +113,7 @@ module Appsignal
         :environment  => sanitized_environment,
         :session_data => sanitized_session_data,
         :backtrace    => cleaned_backtrace(error.backtrace),
+        :metadata     => metadata,
         :tags         => sanitized_tags
       }.each do |key, data|
         next unless data.is_a?(Array) || data.is_a?(Hash)
@@ -181,6 +182,11 @@ module Appsignal
           out[key] = request.env[key] if request.env[key]
         end
       end
+    end
+
+    def metadata
+      return unless request.env
+      request.env[:metadata]
     end
 
     def sanitized_session_data
